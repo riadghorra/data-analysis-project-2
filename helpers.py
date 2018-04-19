@@ -104,6 +104,13 @@ def get_im_files(_dir):
                 f.append(os.path.join(dirpath, file))
     return f
 
+def show_image(filename):
+    a = plt.figure()
+    plt.imshow(plt.imread(filename))
+    
+    plt.title("Image " + str(filename))
+    plt.show()
+
 def show_images(_dir):
     ''' show 24 images as given in _dir '''
     largest = 24
