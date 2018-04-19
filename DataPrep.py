@@ -31,16 +31,17 @@ if __name__ == '__main__':
     # Flatten, so one list has all paths
     all_images_flat = [item for sublist in all_images for item in sublist]
     print('Found {} images'.format(len(all_images_flat)))
-
+    
+    # create y with 0 = clear, 1 = foggy
     # visualize all images in 4 x 6 subplots
     create_subs = False
     if create_subs:
         create_subplots(foggy_im)
         create_subplots(clear_im)
         #create_subplots(net_im)
-        
+            
     # Build X and y
-    y_listed = np.zeros(len(all_images_flat))
+    y_listed = np.zeros(len(all_images_flat), dtype=int)
     run_index = 0
     for i, images in enumerate(all_images):
         if i == 0:
@@ -50,7 +51,7 @@ if __name__ == '__main__':
             # Speghetti code
             y_listed[run_index:(run_index + len(images))] = i
             run_index += len(images)
-              
+
     # Notice that it takes time to build this, as it is memory heavy, and computationally heavy
     # X_listed = build_X(all_images_flat)
     # normally takes ten minutes
@@ -60,8 +61,11 @@ if __name__ == '__main__':
     p = Pool(cores)
     X_listed = p.map(build_img, all_images_flat)
     
+
     writer = csv.writer(open("speedUp.csv", 'w'))
-    for row in X_listed:
+    for i, row in enumerate(X_listed):
+        # add target value to row + file name
+        row = np.concatenate([[all_images_flat[i]], row, [y_listed[i]]])
         writer.writerow(row)
 
     print("--- %s seconds ---" % (time.time() - start_time))
