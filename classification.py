@@ -3,7 +3,7 @@
 """
 Created on Thu Apr 19 14:16:20 2018
 
-@author: wisse
+@author: Wisse
 """
 
 import numpy as np
@@ -13,8 +13,13 @@ from sklearn.ensemble import RandomForestClassifier as rndForest
 from sklearn.svm import SVC
 from sklearn.metrics import accuracy_score
 
+# datasets 
+datasets = ['Skive_Billund_50_50.csv', 'Skive_Billund_10_90.csv', 'Skive50_50.csv', 'billund_90_10.csv']
+index = 2
+
 # processed data
-data = np.loadtxt('speedUp.csv', delimiter=',', dtype=object)
+data = np.loadtxt(datasets[index], delimiter=',', dtype=object, encoding='utf-8')
+
 
 
 # split input and target
@@ -22,7 +27,7 @@ X = data[:, 1:-1].astype(float)
 y = data[:,-1].astype(int)
 
 # K fold cross validation
-K = 2
+K = 5
 kf = KFold(n_splits=K, shuffle=True)
 
 # normalization (maybe not necessary since all constructed features)
@@ -30,12 +35,12 @@ normalization = False
 
 # model selection params and initialize error arrays
 # Random Forest
-n_estimators = [10, 100, 1000]
+n_estimators = [10, 100, 1000, 10000]
 n_estimators_score = np.zeros((K, len(n_estimators)))
 random_forest_score = np.zeros((K))
 
 # SVM
-C_params = np.logspace(-5, 4, 10)
+C_params = np.logspace(-5, 10, 15)
 C_params_score = np.zeros((K, len(C_params)))
 SVM_score = np.zeros((K))
 
@@ -91,9 +96,7 @@ for i, (train_out_idx, test_idx) in enumerate(kf.split(X)):
     
     # --- SVM ---
     C_params_mean_score = np.mean(C_params_score, axis  = 0)
-    # seems to all have the same error (?)
-    # print n_estimator_mean_score
-    svm_max_idx = np.argmax(n_estimator_mean_score)
+    svm_max_idx = np.argmax(C_params_mean_score)
     opt_c = C_params[svm_max_idx] 
     print ('\n ---- Best score for SVM for C = {} with score = {}'.format(opt_c, C_params_mean_score[svm_max_idx]))
     print ('\n')
@@ -115,5 +118,7 @@ for i, (train_out_idx, test_idx) in enumerate(kf.split(X)):
     print ('Total score for outer loop {} for SVM = {}'.format(i + 1, score))
     SVM_score[i] = score
 
-print ('\n\nRandom Forest generalization score on {} fold CV = {}'.format(K, np.mean(random_forest_score)))
+# Final Scores for all models
+print ('\n\nFinal accuracy results for {}'.format(datasets[index]))
+print ('Random Forest generalization score on {} fold CV = {}'.format(K, np.mean(random_forest_score)))
 print ('SVM generalization score on {} fold CV = {}'.format(K, np.mean(SVM_score)))
