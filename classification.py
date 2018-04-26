@@ -15,12 +15,13 @@ from sklearn.metrics import accuracy_score
 
 # datasets 
 datasets = ['Skive_Billund_50_50.csv', 'Skive_Billund_10_90.csv', 'Skive50_50.csv', 'billund_90_10.csv']
-index = 2
+index = 1
+
 
 # processed data
 data = np.loadtxt(datasets[index], delimiter=',', dtype=object, encoding='utf-8')
 
-
+print data
 
 # split input and target
 X = data[:, 1:-1].astype(float)
@@ -35,7 +36,7 @@ normalization = False
 
 # model selection params and initialize error arrays
 # Random Forest
-n_estimators = [10, 100, 1000, 10000]
+n_estimators = [10, 100, 1000]
 n_estimators_score = np.zeros((K, len(n_estimators)))
 random_forest_score = np.zeros((K))
 
