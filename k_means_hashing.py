@@ -7,6 +7,7 @@ Created on Thu Apr 12 14:06:46 2018
 import numpy as np
 import sys
 import os
+import csv
 
 import scipy.fftpack
 import time
@@ -102,7 +103,8 @@ if __name__ == '__main__':
         X_listed.append(imageProcessing(image))
     
     images, hashes = [x[0] for x in X_listed], np.array([x[1] for x in X_listed])
-    
+    # dictionary which gonna store name of file and its hash
+    all_hash = {}
     y_list = []
     # creating a list with 0 and 1, meaning nonfoggy and foggy sample
     for i in range(len(X_listed)):
@@ -111,19 +113,28 @@ if __name__ == '__main__':
 
         if "clear" in X_listed[i][0]: 
             y_list.append(0)
+            all_hash[tempName[-22:]] = 0
         else:
             y_list.append(1)
+            all_hash[tempName[-22:]] = 1
+
 
 # we create a list (X) with the hahsing strings converted to binary numbers      
+    
     hashes_bin = [];
-    for element in hashes:
+    hashes_bin_d = {};
+    
+    for k in range(len(hashes)):
+    #for element in hashes:
         scale = 16 ## equals to hexadecimal
         num_of_bits = scale * 4
         # CONVERT TO BINARY
-        element = str(element)
+        #element = str(element)
+        element = str(hashes[k])
         temp = bin(int(element, scale))[2:].zfill(num_of_bits)   
         bin_list=[int(i) for  i in temp]
         hashes_bin.append(bin_list)
+        #hashes_bin_d[all_hash]
 
     # we use the K-means algorithm with 2 clusters to cluster the videos using the binary hash
     K = 2
@@ -140,13 +151,50 @@ if __name__ == '__main__':
     c2 = 0
     r1 = 0
     r2 = 0
+    cluster_A = []
+    cluster_B = []
     for i in range(len(y_list)):
+        tempName = X_listed[i][0]
+        if cls[i] == 0:
+            cluster_A.append(tempName)
+        else:
+            cluster_B.append(tempName)
+        
         if y_list[i] == cls[i]:
             c1 = c1 + 1
         else:
             c2 = c2 + 1
 
-    # calculating the accuracy of the clustering, by choosing the higher ratio            
-    r1 = c1/len(y_list)
-    r2 = c2/len(y_list)
-    print("The accuracy of k-means clustering on hashed images, for the dataset", foggy_im_path[-18:-7], " is: ", max(r1, r2))
+    # calculating the accuracy of the clustering, by choosing the higher ratio
+    result = max(c1, c2)/len(y_list)          
+#    r1 = c1/len(y_list)
+#    r2 = c2/len(y_list)
+#    
+#    if r1 > r2:
+#        result = r1
+#        
+#    else:
+#        result = r2
+    print("The accuracy of k-means clustering on hashed images, for the dataset", foggy_im_path[-18:-7], " is: ", result)
+    with open("c_A_hashing_kmeans_Skive_Billund_10_90.csv", "w") as output:
+        writer = csv.writer(output, lineterminator='\n')
+        for val in cluster_A:
+            writer.writerow([val])  
+            
+    with open("c_B_hashing_kmeans_Skive_Billund_10_90.csv", "w") as output:
+        writer = csv.writer(output, lineterminator='\n')
+        for val in cluster_B:
+            writer.writerow([val])             
+            
+#    writer = csv.writer(open("cluster_A_hashing_kmeans.csv", 'w'))
+#    for i in range(len(cluster_A)):
+#        # add target value to row + file name
+#        #row = np.concatenate([[all_images_flat[i]], row, [y_listed[i]]])
+#        writer.writerow(cluster_A[i])
+    
+#    with open('cluster_A_hashing_kmeans', 'wb') as myfile:
+#        wr = csv.writer(myfile, quoting=csv.QUOTE_ALL)
+#        wr.writerow(cluster_A)
+#    with open('cluster_B_hashing_kmeans', 'wb') as myfile:
+#        wr = csv.writer(myfile, quoting=csv.QUOTE_ALL)
+#        wr.writerow(cluster_B)
