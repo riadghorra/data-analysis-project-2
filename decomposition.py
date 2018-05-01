@@ -133,7 +133,7 @@ for dataset in datasets:
             
         except Exception as e:
             print ('An error occured: {}'.format(e))
-            print ('Conitinuing')
+            print ('Continuing \n')
             continue
 
     
